@@ -3,6 +3,8 @@ const {resolve} = require("path");
 const {Client, Intents, Permissions} = require('discord.js');
 const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], partials: ['MESSAGE']});
 
+const version = require('./package.json').version;
+
 const bot_token = process.env['bot_token'];
 const bot_uid = process.env['bot_uid'];
 
@@ -21,6 +23,10 @@ client.login(bot_token)
 client.on('messageCreate', message => {
     handleMessage(message);
 });
+client.on('ready', () => {
+   console.log('Connected!');
+   updateActivity();
+});
 
 function handleMessage(message) {
     if(message.author.id !== bot_uid) {
@@ -38,14 +44,15 @@ function handleMessage(message) {
 }
 
 function isMod(message) {
-    if(!message.guild) {
+    if(message.inGuild()) {
+        let mod = false;
+        try {
+            mod = message.member.permissions.has([Permissions.FLAGS.MANAGE_MESSAGES, true]);
+        } catch {}
+        return mod;
+    }else {
         return false;
     }
-    let mod = false;
-    try {
-        mod = message.member.permissions.has([Permissions.FLAGS.MANAGE_MESSAGES, true]);
-    } catch {}
-    return mod;
 }
 
 function handleCommand(message) {
@@ -58,7 +65,7 @@ function handleCommand(message) {
                     if(args.length === 2) {
                         watch(message.channel.id, message);
                     }else {
-                        watch(parseChannelId(args[2]), message);
+                        watch(parseChannelId(args[2], message), message);
                     }
                     break;
                 case 'unwatch':
@@ -66,7 +73,7 @@ function handleCommand(message) {
                     if(args.length === 2) {
                         unwatch(message.channel.id, message);
                     }else {
-                        unwatch(parseChannelId(args[2]), message);
+                        unwatch(parseChannelId(args[2], message), message);
                     }
                     break;
                 default:
@@ -81,13 +88,17 @@ function handleCommand(message) {
     }
 }
 
-function parseChannelId(string) {
-    if(!string) {
+function parseChannelId(string, message) {
+    if(!string || !message) {
         return;
     }
     if(string.startsWith('<#') && string.endsWith('>')) {
         string = string.slice(2, -1);
-        return client.channels.cache.get(string).id;
+        let channelId = client.channels.cache.get(string).id;
+        let guildId = client.channels.cache.get(string).guildId;
+        if(message.guildId === guildId) {
+            return channelId;
+        }
     }
 }
 
@@ -142,6 +153,13 @@ function loadChannels() {
 
 function saveChannels() {
     fs.writeFileSync(resolve(__dirname, channel_file), JSON.stringify( watched_channels ), "utf8");
+    updateActivity();
+}
+
+function updateActivity() {
+    client.user.setActivity(`${watched_channels.length} channel${watched_channels.length === 1 ? "":"s"} || VER${version}`, {
+        type: "WATCHING"
+    });
 }
 
 // https://stackoverflow.com/questions/63264290/discord-js-how-to-use-bot-mention-and-a-set-prefix-as-prefixes
