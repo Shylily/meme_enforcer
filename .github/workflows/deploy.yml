@@ -24,7 +24,7 @@ jobs:
           REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.REMOTE_TARGET }}
-          EXCLUDE: "/.idea/, /node_modules/, /.git/, /.github/, /.gitignore, /package-lock.json"
+          EXCLUDE: "/.idea/, /node_modules/, /.git/, /.github/, /.gitignore, /package-lock.json, /README.md"
           
     - name: Restart bot & check status
       uses: garygrossgarten/github-action-ssh@release
