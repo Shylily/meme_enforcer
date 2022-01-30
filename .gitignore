@@ -1,0 +1,5 @@
+# Project exclude paths
+/.idea/
+/node_modules/
+/watched_channels.json
+/package-lock.json
