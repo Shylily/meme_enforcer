@@ -1,0 +1,35 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'bot.js'
+      - 'package.json'
+
+jobs:
+  Deploy:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Deploy to Server
+      uses: easingthemes/ssh-deploy@main
+      env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rltgoDzvO --delete"
+          SOURCE: "/"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+          EXCLUDE: "/.idea/, /node_modules/, /.git/, /.github/, /.gitignore, /package-lock.json"
+          
+    - name: Restart bot & check status
+      uses: garygrossgarten/github-action-ssh@release
+      with:
+        command: npm install --production && sudo systemctl restart meme_enforcer.service && sleep 10 && sudo systemctl status meme_enforcer.service
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
