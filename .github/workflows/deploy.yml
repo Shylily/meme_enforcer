@@ -29,7 +29,7 @@ jobs:
     - name: Restart bot & check status
       uses: garygrossgarten/github-action-ssh@release
       with:
-        command: npm install --production && sudo systemctl restart meme_enforcer.service && sleep 10 && sudo systemctl status meme_enforcer.service
+        command: npm --prefix ${{ secrets.REMOTE_TARGET }} install --production && sudo systemctl restart meme_enforcer.service && sleep 10 && sudo systemctl status meme_enforcer.service
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
