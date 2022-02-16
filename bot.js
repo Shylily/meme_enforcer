@@ -32,15 +32,27 @@ function handleMessage(message) {
     if(message.author.id !== bot_uid) {
         if(watched_channels.includes(message.channel.id)) {
             //delete if more than one attachment
-            if(message.attachments.size > 1 && !isMod(message)) {
+            if(countAllAttachments(message) > 1 && !isMod(message)) {
                 message.delete().catch(console.error);
-                message.channel.send(`<@${message.author.id}> You can only send one attachment at a time`);
+                message.channel.send(`<@${message.author.id}> You can only send one meme at a time`);
             }
         }
         if(hasPrefix(message.content)) {
             handleCommand(message);
         }
     }
+}
+
+function countAllAttachments(message) {
+    let attachments = message.attachments.size;
+    let links       = countLinks(message);
+    console.log(links);
+    return attachments + links;
+}
+
+function countLinks(message) {
+    const re = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&/=]*)/g
+    return ((message.content || '').match(re) || []).length;
 }
 
 function isMod(message) {
