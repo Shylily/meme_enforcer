@@ -26,6 +26,10 @@ client.on('messageCreate', message => {
 client.on('ready', () => {
    console.log('Connected!');
    updateActivity();
+   // Set activity status once, then every hour
+   setInterval(function() {
+       updateActivity();
+   }, 3600000)
 });
 
 function handleMessage(message) {
