@@ -34,7 +34,9 @@ function handleMessage(message) {
             //delete if more than one attachment
             if(countAllAttachments(message) > 1 && !isMod(message)) {
                 message.delete().catch(console.error);
-                message.channel.send(`<@${message.author.id}> You can only send one meme at a time`);
+                message.channel.send(`<@${message.author.id}> You can only send one meme at a time`).catch(console.error);
+            }else if(countAllAttachments(message) === 1) {
+                handleMedia(message)
             }
         }
         if(hasPrefix(message.content)) {
@@ -43,10 +45,31 @@ function handleMessage(message) {
     }
 }
 
+function handleMedia(message) {
+    if(message.attachments.size === 1) {
+        let attachment = message.attachments.values().next().value;
+        if(attachment.contentType.includes('video/')) {
+            // Video checks
+            if(attachment.height !== null && attachment.width !== null) {
+                // Resolution check
+                if(attachment.height * attachment.width < 200000) {
+                    message.reply(`Bruv what a blurry meme`).catch(console.error);
+                }
+            }
+        }else if(attachment.contentType.includes('image/')) {
+            // Image checks
+            if(attachment.height !== null && attachment.width !== null) {
+                //console.log(attachment.height * attachment.width);
+            }
+        }
+    }else if(message.embeds.length === 1) {
+
+    }
+}
+
 function countAllAttachments(message) {
     let attachments = message.attachments.size;
     let links       = countLinks(message);
-    console.log(links);
     return attachments + links;
 }
 
