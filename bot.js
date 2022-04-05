@@ -56,7 +56,7 @@ function handleMedia(message) {
             // Video checks
             if(attachment.height !== null && attachment.width !== null) {
                 // Resolution check
-                if(attachment.height * attachment.width < 200000) {
+                if(attachment.height * attachment.width < 100000) {
                     message.reply(`Bruv what a blurry meme`).catch(console.error);
                 }
             }
