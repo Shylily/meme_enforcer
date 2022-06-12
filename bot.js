@@ -111,7 +111,7 @@ function isMod(message) {
     if(message.inGuild()) {
         let mod = false;
         try {
-            mod = message.member.permissions.has([Permissions.FLAGS.MANAGE_MESSAGES, true]);
+            mod = message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES, true);
         } catch {}
         return mod;
     }else {
