@@ -1,7 +1,7 @@
 const fs = require("fs");
 const {resolve} = require("path");
 const {Client, Intents, Permissions} = require('discord.js');
-const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES], partials: ['MESSAGE']});
+const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MESSAGE_REACTIONS], partials: ['MESSAGE', 'REACTION']});
 
 const version = require('./package.json').version;
 
@@ -22,6 +22,10 @@ client.login(bot_token)
 
 client.on('messageCreate', message => {
     handleMessage(message);
+});
+client.on('messageReactionAdd', reaction => {
+    handleReaction(reaction)
+        .catch(error => console.error("Error handling reaction:", error));
 });
 client.on('ready', () => {
    console.log('Connected!');
@@ -68,6 +72,27 @@ function handleMedia(message) {
         }
     }else if(message.embeds.length === 1) {
 
+    }
+}
+
+async function handleReaction(reaction) {
+    // Only handle reactions in watched channels
+    if(watched_channels.includes(reaction.message.channelId)) {
+        // Retrieve old messages if they aren't loaded
+        if(reaction.partial) {
+            try {
+                await reaction.fetch();
+            }catch (error) {
+                console.error("Error fetching message: ", error);
+                return;
+            }
+        }
+        // Only remove reactions on messages sent from the bot
+        if(reaction.message.author.id === String(bot_uid)) {
+            console.log(reaction);
+            reaction.message.reactions.removeAll()
+                .catch(error => console.error("Failed to remove reactions: ", error));
+        }
     }
 }
 
