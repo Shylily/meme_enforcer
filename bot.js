@@ -111,7 +111,7 @@ function isMod(message) {
     if(message.inGuild()) {
         let mod = false;
         try {
-            mod = message.member.permissions.has([Permissions.FLAGS.MANAGE_MESSAGES, true]);
+            mod = message.member.permissions.has(Permissions.FLAGS.MANAGE_MESSAGES, true);
         } catch {}
         return mod;
     }else {
@@ -158,11 +158,17 @@ function parseChannelId(string, message) {
     }
     if(string.startsWith('<#') && string.endsWith('>')) {
         string = string.slice(2, -1);
-        let channelId = client.channels.cache.get(string).id;
-        let guildId = client.channels.cache.get(string).guildId;
-        if(message.guildId === guildId) {
-            return channelId;
-        }
+    }
+    let channelId, guildId;
+    try {
+        channelId = client.channels.cache.get(string).id;
+        guildId = client.channels.cache.get(string).guildId;
+    }catch (error) {
+        console.error("Unknown channel / guild: ", error);
+        return;
+    }
+    if(typeof channelId !== 'undefined' && message.guildId === guildId) {
+        return channelId;
     }
 }
 
